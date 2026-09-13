@@ -1,0 +1,16 @@
+Package: LMGPEpi
+Type: Package
+Title: Latent Mechanistic Gaussian Processes for Partially Observed Stochastic Epidemics
+Version: 0.1.0
+Authors@R: c(
+    person(
+      "Suchismita", "Roy",
+      email = "suchismitar126@gmail.com",
+      role = c("aut", "cre")
+    )
+  )
+Description: This package contains all the functions used in the paper, "Latent Mechanistic Gaussian Processes for Partially Observed Stochastic Epidemics". This is a method designed for partially observed epidemic count data. 
+License: GPL (>= 3)
+Encoding: UTF-8
+LazyData: true
+Config/roxygen2/version: 8.1.0
