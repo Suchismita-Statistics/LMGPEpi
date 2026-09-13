@@ -118,13 +118,36 @@ LMGP <- function(data_obs, Tmax, N, prob = FALSE, dt = 0.1, n_mc = 2000, r_a = 1
   )
   if(prob) data_list <- c(data_list, list(r_a = r_a, r_b = r_b, p_a = p_a, p_b = p_b))
 
-  if (prob == TRUE) {
-    stan_file = system.file("stan", "LMGP_with_prob.stan", package = "LMGPEpi")
+  # if (prob == TRUE) {
+  #   stan_file = system.file("stan", "LMGP_with_prob.stan", package = "LMGPEpi")
+  # } else {
+  #   stan_file = system.file("stan", "LMGP_wo_prob.stan", package = "LMGPEpi")
+  # }
+  #
+  # sm = rstan::stan_model(file = stan_file)
+
+  stan_name <- if (isTRUE(prob)) {
+    "LMGP_with_prob.stan"
   } else {
-    stan_file = system.file("stan", "LMGP_wo_prob.stan", package = "LMGPEpi")
+    "LMGP_wo_prob.stan"
   }
 
-  sm = rstan::stan_model(file = stan_file)
+  stan_file <- system.file(
+    "stan",
+    stan_name,
+    package = "LMGPEpi"
+  )
+
+  if (!nzchar(stan_file) || !file.exists(stan_file)) {
+    stop(
+      "Could not find Stan file: ", stan_name,
+      "\nExpected path: ", stan_file
+    )
+  }
+
+  message("Using Stan file: ", normalizePath(stan_file))
+
+  sm <- rstan::stan_model(file = stan_file)
 
   # -------------------------------------------------------------
   # Clock 1: Stan sampling (includes warmup)

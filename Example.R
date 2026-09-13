@@ -1,7 +1,13 @@
-library(DSA.CountData)
-N = 1e4; beta = 1.5; gamma = 1; rho = 0.05; p = 0.6; Tmax = 10
+library(LMGPEpi)
+
+# The true parameters are N = 1e4; beta = 1.5; gamma = 1; rho = 0.05; p = 0.6; Tmax = 10
+
+
 trial_data = noisy_data_sim(N = 1e4, beta = 1.5, gamma = 1, rho = 0.05, p = 0.6, Tmax = 10) #Substitute with your Data
 print(trial_data)
+
+
+
 
 ## Substitute according to your model
 
