@@ -10,14 +10,17 @@ devtools::install_github("Suchismita-Statistics/LMGPEpi")
 
 # About the package
 
-LMGP (Latent Mechanistic Gaussian Processes) proposes a computationally efficient method about the parameters -  infection rate ($\beta$) and recovery rate ($\gamma$). It further estimates the limiting proportion of susceptible and infected ($\rho$). The DSA method does not necessarily require information on the number of initial susceptible individuals. It can also be estimated.  
 
-This package contains all the R codes required to implement the paper. 
-new_data_ct_lkd() is the main function to apply count likelihood for a new daily count data, which simulates HMC posterior samples via stan. We used rstan::version 2.21.8.  
-Please look at the Example.R file to see the usage of the important functions. To do so, write the following code in the terminal:  
+The package includes two models: one for accurate count data and one for under-reported count data. Inference uses LMGP (Latent Mechanistic Gaussian Processes), which proposes a computationally efficient method for estimating the parameters: infection rate ($\beta$), recovery rate ($\gamma$) and the limiting proportion of susceptible and infected ($\rho$). For the under-reported model, it also estimates the under-reporting probability.
+
+This package contains all the R functions required to implement the method. 
+LMGP() is the main function to apply the method to new daily count data, which simulates HMC posterior samples via stan. We used rstan::version 2.32.7.  
+Please see the Example.R file for usage of the key functions. To do so, write the following code in the terminal:  
 
 ```
-git clone https://github.com/Suchismita-Statistics/DSA.CountData.git
-cd DSA.CountData
+git clone https://github.com/Suchismita-Statistics/LMGPEpi.git
+cd LMGPEpi
 Rscript Example.R
 ```
+
+DRC_Ebola_Application.R applies the method to the Ebola 2026 epidemic in the DRC. The stan files are in the "inst/stan" folder. 
