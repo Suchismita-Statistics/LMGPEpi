@@ -11,50 +11,109 @@
 #' @export
 
 
-summary_stan_list_adj <- function(result_list, true_value, prob = FALSE, notcap = FALSE)
+summary_stan_list_adj <- function(result_list,
+                                  true_value,
+                                  prob = FALSE,
+                                  notcap = FALSE)
 {
-  if(prob)
+  if (prob)
   {
     par = c("b", "g", "r", "R0", "p")
-  }else{
+  } else{
     par = c("b", "g", "r", "R0")
   }
-  draws_list <- lapply(result_list, function(x) rstan::extract(x$fit_full, pars = par))
+  draws_list <- lapply(result_list, function(x)
+    rstan::extract(x$fit_full, pars = par))
 
-  Z_hats <- lapply(result_list, function(x) x$Z_hat)
+  Z_hats <- lapply(result_list, function(x)
+    x$Z_hat)
   M <- length(Z_hats[[1]])
-  wts        <- lapply(Z_hats, function(x) wnorm_calc(x, M)$w_norm)
+  wts        <- lapply(Z_hats, function(x)
+    wnorm_calc(x, M)$w_norm)
 
-  ess_per_sec_mat <- t(mapply(essinfo_per_replicate, result_list, wts,
-                              MoreArgs = list(par = par)))  # rows = replicates, cols = b,g,r,R0
+  ess_per_sec_mat <- t(mapply(essinfo_per_replicate, result_list, wts, MoreArgs = list(par = par)))  # rows = replicates, cols = b,g,r,R0
 
-  para_beta  <- summary_stan_adj(draws_list, wts, ess_per_sec_mat[, "b"],  index = 1, true_value = true_value[1], not_cap = notcap)
-  para_gamma <- summary_stan_adj(draws_list, wts, ess_per_sec_mat[, "g"],  index = 2, true_value = true_value[2], not_cap = notcap)
-  para_rho   <- summary_stan_adj(draws_list, wts, ess_per_sec_mat[, "r"],  index = 3, true_value = true_value[3], not_cap = notcap)
-  para_R0    <- summary_stan_adj(draws_list, wts, ess_per_sec_mat[, "R0"], index = 4, true_value = true_value[1] / true_value[2], not_cap = notcap)
+  para_beta  <- summary_stan_adj(
+    draws_list,
+    wts,
+    ess_per_sec_mat[, "b"],
+    index = 1,
+    true_value = true_value[1],
+    not_cap = notcap
+  )
+  para_gamma <- summary_stan_adj(
+    draws_list,
+    wts,
+    ess_per_sec_mat[, "g"],
+    index = 2,
+    true_value = true_value[2],
+    not_cap = notcap
+  )
+  para_rho   <- summary_stan_adj(
+    draws_list,
+    wts,
+    ess_per_sec_mat[, "r"],
+    index = 3,
+    true_value = true_value[3],
+    not_cap = notcap
+  )
+  para_R0    <- summary_stan_adj(
+    draws_list,
+    wts,
+    ess_per_sec_mat[, "R0"],
+    index = 4,
+    true_value = true_value[1] / true_value[2],
+    not_cap = notcap
+  )
 
-  if(!prob)
+  if (!prob)
   {
     colnam <- c("mn", "sdofmean", "sd", "95%cvg", "ESS/s")
     if (notcap == FALSE) {
-      mat <- matrix(c(para_beta, para_gamma, para_rho, para_R0), ncol = 5, byrow = TRUE)
+      mat <- matrix(
+        c(para_beta, para_gamma, para_rho, para_R0),
+        ncol = 5,
+        byrow = TRUE
+      )
       colnames(mat) <- colnam
       rownames(mat) <- c("beta", "gamma", "rho", "R0")
       return(mat)
     } else {
-      not_captured <- list(beta = para_beta, gamma = para_gamma, rho = para_rho, R0 = para_R0)
+      not_captured <- list(
+        beta = para_beta,
+        gamma = para_gamma,
+        rho = para_rho,
+        R0 = para_R0
+      )
       return(not_captured)
     }
-  }else{
-    para_p   <- summary_stan_adj(draws_list, wts, ess_per_sec_mat[, "p"],  index = 4, true_value = true_value[4], not_cap = notcap)
+  } else{
+    para_p   <- summary_stan_adj(
+      draws_list,
+      wts,
+      ess_per_sec_mat[, "p"],
+      index = 4,
+      true_value = true_value[4],
+      not_cap = notcap
+    )
     colnam <- c("mn", "sdofmean", "sd", "95%cvg", "ESS/s")
     if (notcap == FALSE) {
-      mat <- matrix(c(para_beta, para_gamma, para_rho, para_p, para_R0), ncol = 5, byrow = TRUE)
+      mat <- matrix(
+        c(para_beta, para_gamma, para_rho, para_p, para_R0),
+        ncol = 5,
+        byrow = TRUE
+      )
       colnames(mat) <- colnam
       rownames(mat) <- c("beta", "gamma", "rho", "p", "R0")
       return(mat)
     } else {
-      not_captured <- list(beta = para_beta, gamma = para_gamma, rho = para_rho, p = para_p, R0 = para_R0)
+      not_captured <- list(
+        beta = para_beta,
+        gamma = para_gamma,
+        rho = para_rho,
+        p = para_p,
+        R0 = para_R0
+      )
       return(not_captured)
     }
   }

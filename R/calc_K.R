@@ -106,23 +106,22 @@ calc_K = function(beta, gamma, rho, Tmax, dt, simpson_coeff, N)
 
   inv_store = matrix(0, ncol = 2, nrow = ful_len)
   temp = ode_solve[, 4:7]
-  det = temp[, 1]*temp[, 4] - temp[, 2]*temp[, 3]
-  inv_store[, 1] = temp[, 4]/det
-  inv_store[, 2] = - temp[, 3]/det
+  det = temp[, 1] * temp[, 4] - temp[, 2] * temp[, 3]
+  inv_store[, 1] = temp[, 4] / det
+  inv_store[, 2] = -temp[, 3] / det
 
   phi11 = matrix(0, ncol = ful_len, nrow = nrow(ode_solve))
   phi12 = matrix(0, ncol = ful_len, nrow = nrow(ode_solve))
-  for(i in 1:ful_len)
+  for (i in 1:ful_len)
   {
-    phi11[, i] = ode_solve[, 4]*inv_store[i, 1] + ode_solve[, 5]*inv_store[i, 2]
-    phi12[, i] = ode_solve[, 6]*inv_store[i, 1] + ode_solve[, 7]*inv_store[i, 2]
+    phi11[, i] = ode_solve[, 4] * inv_store[i, 1] + ode_solve[, 5] * inv_store[i, 2]
+    phi12[, i] = ode_solve[, 6] * inv_store[i, 1] + ode_solve[, 7] * inv_store[i, 2]
   }
 
   cov_mat = matrix(0, ncol = ful_len, nrow = ful_len)
 
-  for(i in 2:ful_len)
+  for (i in 2:ful_len)
   {
-
     upto = i
     s_i = ode_solve[1:upto, 2]
     iota_i = ode_solve[1:upto, 3]
@@ -134,18 +133,21 @@ calc_K = function(beta, gamma, rho, Tmax, dt, simpson_coeff, N)
     simp_coeff = rep(1, upto)
     simp_coeff[1:(upto - 1)] = simpson_coeff[1:(upto - 1)]
 
-    cov_mat[i, i] = sum(beta*s_i*iota_i*diff_i*diff_i*dt*simp_coeff)/3 + sum(dt*gamma*phi12_i*phi12_i*iota_i*simp_coeff)/3
-    if(i < ful_len)
+    cov_mat[i, i] = sum(beta * s_i * iota_i * diff_i * diff_i * dt * simp_coeff) /
+      3 + sum(dt * gamma * phi12_i * phi12_i * iota_i * simp_coeff) / 3
+    if (i < ful_len)
     {
-      for(j in (i+1):ful_len)
+      for (j in (i + 1):ful_len)
       {
         diff_j = phi11[1:upto, j] - phi12[1:upto, j]
         phi12_j = phi12[1:upto, j]
-        cov_mat[i, j] = sum(dt*beta*s_i*iota_i*diff_i*diff_j*simp_coeff)/3 + sum(dt*gamma*phi12_i*phi12_j*iota_i*simp_coeff)/3
+        cov_mat[i, j] = sum(dt * beta * s_i * iota_i * diff_i * diff_j *
+                              simp_coeff) / 3 + sum(dt * gamma * phi12_i * phi12_j * iota_i * simp_coeff) /
+          3
 
         cov_mat[j, i] = cov_mat[i, j]
       }
     }
   }
-  return(list(mn = ode_solve[, 2], cov = cov_mat/N))
+  return(list(mn = ode_solve[, 2], cov = cov_mat / N))
 }

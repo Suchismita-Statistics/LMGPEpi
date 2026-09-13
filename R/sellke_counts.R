@@ -18,7 +18,14 @@
 
 sellke_counts = function(N, beta, gamma, rho, Tmax, nu = NULL)
 {
-  data_Sellke = DSA.CountData::sellke(n = N, beta = beta, gamma = gamma, rho = rho, Tmax = Tmax, nu = nu)
+  data_Sellke = DSA.CountData::sellke(
+    n = N,
+    beta = beta,
+    gamma = gamma,
+    rho = rho,
+    Tmax = Tmax,
+    nu = nu
+  )
   initial_sus = data_Sellke[data_Sellke[, 1] != 0, ]
 
   M = nrow(data_Sellke) - N
@@ -38,4 +45,3 @@ sellke_counts = function(N, beta, gamma, rho, Tmax, nu = NULL)
   colnames(temp) = c("days_reporting", "true_counts")
   return(temp)
 }
-

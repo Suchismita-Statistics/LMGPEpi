@@ -8,9 +8,10 @@ LMGP_ppc(
   fit_full,
   data_obs,
   N,
+  prob = TRUE,
   raw_data = NULL,
   w_norm = NULL,
-  probs = c(0.025, 0.5, 0.975)
+  quantile_probs = c(0.025, 0.5, 0.975)
 )
 }
 \arguments{
@@ -24,7 +25,7 @@ LMGP_ppc(
 
 \item{w_norm}{Normalized weights. If \code{NULL}, equal weights will be used.}
 
-\item{probs}{A vector of probabilities, will be used to make credible intervals in posterior predictive checks. The default is \code{0.025, 0.5, 0.975}.}
+\item{quantile_probs}{A vector of probabilities, will be used to make credible intervals in posterior predictive checks. The default is \code{0.025, 0.5, 0.975}.}
 }
 \description{
 Posterior predictive check for models fitted using LMGP method.

@@ -19,7 +19,14 @@
 
 noisy_data_sim = function(N, beta, gamma, rho, p, Tmax, nu = NULL)
 {
-  count_data = sellke_counts(N = N, beta = beta, gamma = gamma, r = rho, Tmax = Tmax, nu = nu)
+  count_data = sellke_counts(
+    N = N,
+    beta = beta,
+    gamma = gamma,
+    r = rho,
+    Tmax = Tmax,
+    nu = nu
+  )
   true_noise = rbinom(nrow(count_data), count_data[, 2], p)
 
   final_data = cbind(count_data, underreported_counts = true_noise)

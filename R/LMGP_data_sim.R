@@ -13,10 +13,16 @@
 #'
 #' @export
 
-LMGP_data_sim = function(N, beta, gamma, rho, Tmax, dt = 0.1, iter = 1)
+LMGP_data_sim = function(N,
+                         beta,
+                         gamma,
+                         rho,
+                         Tmax,
+                         dt = 0.1,
+                         iter = 1)
 {
   full_grid = seq(0, Tmax, dt)
-  len = rep(c(4, 2), length(full_grid)/2)
+  len = rep(c(4, 2), length(full_grid) / 2)
   simp_coeff = c(1, len[-length(len)], 1)
 
 
@@ -28,7 +34,7 @@ LMGP_data_sim = function(N, beta, gamma, rho, Tmax, dt = 0.1, iter = 1)
 
   data_gen = matrix(0, ncol = iter, nrow = N)
 
-  for(i in 1:iter)
+  for (i in 1:iter)
   {
     s_T = tail(simulation_mat[i, ], 1)
 
@@ -41,7 +47,7 @@ LMGP_data_sim = function(N, beta, gamma, rho, Tmax, dt = 0.1, iter = 1)
 
     infect_times = samples$y
     infect_times[is.na(infect_times)] = Tmax
-    data_gen[, i] = sort( c(infect_times, rep(Tmax, not_inf_during_epi)))
+    data_gen[, i] = sort(c(infect_times, rep(Tmax, not_inf_during_epi)))
   }
 
   return(data_gen)

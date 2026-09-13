@@ -48,7 +48,14 @@ fwd_ODE = function(beta, gamma, rho, Tmax, dt = 0.1)
 {
   time_pts = seq(0, Tmax, by = dt)
   parameters = c(beta, gamma, rho)
-  state  = c(S = 1, I = rho, f11 = 1, f12 = 0, f21 = 0, f22 = 1)
+  state  = c(
+    S = 1,
+    I = rho,
+    f11 = 1,
+    f12 = 0,
+    f21 = 0,
+    f22 = 1
+  )
 
   Lorenz = function(t, state, parameters) {
     with(as.list(c(state, parameters)), {
@@ -56,7 +63,7 @@ fwd_ODE = function(beta, gamma, rho, Tmax, dt = 0.1)
       dS = -beta * S * I
       dI = beta * S * I - gamma * I
       df11 = beta * I * (f11 - f21)
-      df12 = beta*I*(f12 - f22)
+      df12 = beta * I * (f12 - f22)
       df21 = beta * S * (f11 - f21) + gamma * f21
       df22 = beta * S * (f12 - f22) + gamma * f22
       list(c(dS, dI, df11, df12, df21, df22))
@@ -70,5 +77,3 @@ fwd_ODE = function(beta, gamma, rho, Tmax, dt = 0.1)
   )
   return(out)
 }
-
-

@@ -49,7 +49,12 @@ zhat_stability_replicate <- function(x, n_mc = 2000) {
 
   ess_frac <- (1 / sum(w_norm^2, na.rm = TRUE)) / length(Zhat)
 
-  c(mean_Zhat = mean_Z, sd_Zhat = sd_Z, mean_se_mc = mean_se,
-    min_Zhat = min_Z, ess_frac = ess_frac)
+  c(
+    mean_Zhat = mean_Z,
+    sd_Zhat = sd_Z,
+    mean_se_mc = mean_se,
+    min_Zhat = min_Z,
+    ess_frac = ess_frac
+  )
 }
 

@@ -64,22 +64,41 @@
 #'
 #' @export
 
-LMGP <- function(data_obs, Tmax, N, prob = FALSE, dt = 0.1, n_mc = 2000, r_a = 1, r_b = 1, p_a = 1, p_b = 1,
-                     iteration = 1e4,  ncore = 1, nchain = 1, stan_seed = 1234, initial_value = NULL, single_run_adj = TRUE) {
-
+LMGP <- function(data_obs,
+                 Tmax,
+                 N,
+                 prob = FALSE,
+                 dt = 0.1,
+                 n_mc = 2000,
+                 r_a = 1,
+                 r_b = 1,
+                 p_a = 1,
+                 p_b = 1,
+                 iteration = 1e4,
+                 ncore = 1,
+                 nchain = 1,
+                 stan_seed = 1234,
+                 initial_value = NULL,
+                 single_run_adj = TRUE) {
   obs_len = nrow(data_obs)
 
-  if(is.null(initial_value))
+  if (is.null(initial_value))
   {
-    init_one <- list(b = 1, g = 0.1, r = 0.01, u = rep(1 / ( obs_len  + 1),  obs_len + 1))
-    if(prob) init_one$p <- 0.5
+    init_one <- list(
+      b = 1,
+      g = 0.1,
+      r = 0.01,
+      u = rep(1 / (obs_len  + 1), obs_len + 1)
+    )
+    if (prob)
+      init_one$p <- 0.5
     initial_value <- replicate(nchain, init_one, simplify = FALSE)
   }
 
   K <- sum(data_obs[, 2])
 
   int_len <- length(seq(dt, 1, dt))
-  max_len <- int_len*Tmax+ 1
+  max_len <- int_len * Tmax + 1
   Time_mat <- matrix(0, nrow = obs_len, ncol = max_len)
   for (i in 1:obs_len) {
     Time_mat[i, 1:(i * int_len)] <- seq(dt, i, dt)
@@ -97,26 +116,45 @@ LMGP <- function(data_obs, Tmax, N, prob = FALSE, dt = 0.1, n_mc = 2000, r_a = 1
   # halve dt until every observation time is a grid point an even number of
   # steps from 0 (composite Simpson needs an even count of sub-intervals)
   dt_in <- dt
-  while (max(abs(full_grid[inx] - obs_t)) > 1e-8 || any(inx %% 2 == 0)) {
+  while (max(abs(full_grid[inx] - obs_t)) > 1e-8 ||
+         any(inx %% 2 == 0)) {
     dt <- dt / 2
-    if (dt < 1e-6) stop("cannot place data_obs[, 1] on a uniform grid")
+    if (dt < 1e-6)
+      stop("cannot place data_obs[, 1] on a uniform grid")
     full_grid <- seq(0, max(obs_t), dt)
     inx <- round(obs_t / dt) + 1
   }
-  if (dt < dt_in) message(sprintf("dt reduced %g -> %g (%d grid points)", dt_in, dt, length(full_grid)))
+  if (dt < dt_in)
+    message(sprintf(
+      "dt reduced %g -> %g (%d grid points)",
+      dt_in,
+      dt,
+      length(full_grid)
+    ))
 
   len   <- rep(c(4, 2), length(full_grid) / 2)
   coeff <- c(1, len[-length(len)], 1)
 
-  data_list <- list( N = N, T_max_int = obs_len,
-                     #infection_count = if(prob) c(data_obs[, 2], N - K) else data_obs[, 2],
-                     infection_count =  c(data_obs[, 2], N - K),
-                     t0 = 0, dt = dt,
-                     full_len = length(full_grid),
-                     simpson_coeff = coeff, full_grid = full_grid[full_grid > 0],
-                     index = inx, A = A
+  data_list <- list(
+    N = N,
+    T_max_int = obs_len,
+    #infection_count = if(prob) c(data_obs[, 2], N - K) else data_obs[, 2],
+    infection_count =  c(data_obs[, 2], N - K),
+    t0 = 0,
+    dt = dt,
+    full_len = length(full_grid),
+    simpson_coeff = coeff,
+    full_grid = full_grid[full_grid > 0],
+    index = inx,
+    A = A
   )
-  if(prob) data_list <- c(data_list, list(r_a = r_a, r_b = r_b, p_a = p_a, p_b = p_b))
+  if (prob)
+    data_list <- c(data_list, list(
+      r_a = r_a,
+      r_b = r_b,
+      p_a = p_a,
+      p_b = p_b
+    ))
 
   # if (prob == TRUE) {
   #   stan_file = system.file("stan", "LMGP_with_prob.stan", package = "LMGPEpi")
@@ -132,17 +170,13 @@ LMGP <- function(data_obs, Tmax, N, prob = FALSE, dt = 0.1, n_mc = 2000, r_a = 1
     "LMGP_wo_prob.stan"
   }
 
-  stan_file <- system.file(
-    "stan",
-    stan_name,
-    package = "LMGPEpi"
-  )
+  stan_file <- system.file("stan", stan_name, package = "LMGPEpi")
 
   if (!nzchar(stan_file) || !file.exists(stan_file)) {
-    stop(
-      "Could not find Stan file: ", stan_name,
-      "\nExpected path: ", stan_file
-    )
+    stop("Could not find Stan file: ",
+         stan_name,
+         "\nExpected path: ",
+         stan_file)
   }
 
   message("Using Stan file: ", normalizePath(stan_file))
@@ -154,8 +188,13 @@ LMGP <- function(data_obs, Tmax, N, prob = FALSE, dt = 0.1, n_mc = 2000, r_a = 1
   # -------------------------------------------------------------
   t_stan <- system.time({
     fit_full <- rstan::sampling(
-      sm, data = data_list, iter = iteration, chain = nchain, cores = ncore,
-      init = initial_value, seed = stan_seed
+      sm,
+      data = data_list,
+      iter = iteration,
+      chain = nchain,
+      cores = ncore,
+      init = initial_value,
+      seed = stan_seed
     )
   })["elapsed"]
 
@@ -169,7 +208,7 @@ LMGP <- function(data_obs, Tmax, N, prob = FALSE, dt = 0.1, n_mc = 2000, r_a = 1
 
   t_correction <- system.time({
     for (m in seq_len(M)) {
-        out <- compute_Z_mc(mc_draws$mn[m, ], mc_draws$cov[m, , ], n_mc = n_mc)
+      out <- compute_Z_mc(mc_draws$mn[m, ], mc_draws$cov[m, , ], n_mc = n_mc)
       Z_hat[m] <- out$Z
     }
   })["elapsed"]
@@ -180,7 +219,7 @@ LMGP <- function(data_obs, Tmax, N, prob = FALSE, dt = 0.1, n_mc = 2000, r_a = 1
 
   total_time       <- t_stan + t_correction
 
-  if(single_run_adj)
+  if (single_run_adj)
   {
     # -------------------------------------------------------------
     # ESS/s -- two numbers, two clocks. Do not merge them.
@@ -195,33 +234,44 @@ LMGP <- function(data_obs, Tmax, N, prob = FALSE, dt = 0.1, n_mc = 2000, r_a = 1
     ess_kish         <- 1 / sum(w_norm^2, na.rm = TRUE)
 
 
-    ess_combined <- ess_kish*(ess_stan$ess_bulk)/length(w_norm)
-    ess_comp_ber_sec <- ess_combined/total_time
+    ess_combined <- ess_kish * (ess_stan$ess_bulk) / length(w_norm)
+    ess_comp_ber_sec <- ess_combined / total_time
 
 
     # ---------------------------------------------------------
     # Correction Using Weights
     # ---------------------------------------------------------
 
-    param_names <- if(prob) c("b", "g", "r", "R0", "p") else c("b", "g", "r", "R0")
+    param_names <- if (prob)
+      c("b", "g", "r", "R0", "p")
+    else
+      c("b", "g", "r", "R0")
     ext = rstan::extract(fit_full, pars = param_names)
 
-      keep <- match(param_names, ess_stan$variable)
+    keep <- match(param_names, ess_stan$variable)
 
-    wtd_mean <- sapply(param_names, function(a) sum(w_norm * ext[[a]]))
+    wtd_mean <- sapply(param_names, function(a)
+      sum(w_norm * ext[[a]]))
     wtd_sd   <- sapply(param_names, function(a) {
       m <- wtd_mean[[a]]
       sqrt(sum(w_norm * (ext[[a]] - m)^2) / (1 - sum(w_norm^2)))
     })
-    q_2.5  <- sapply(param_names, function(a) Hmisc::wtd.quantile(ext[[a]], w_norm, probs = 0.025, normwt = TRUE))
-    q_97.5 <- sapply(param_names, function(a) Hmisc::wtd.quantile(ext[[a]], w_norm, probs = 0.975, normwt = TRUE))
+    q_2.5  <- sapply(param_names, function(a)
+      Hmisc::wtd.quantile(ext[[a]], w_norm, probs = 0.025, normwt = TRUE))
+    q_97.5 <- sapply(param_names, function(a)
+      Hmisc::wtd.quantile(ext[[a]], w_norm, probs = 0.975, normwt = TRUE))
 
-    summary_table <- cbind("Weighted mean" = as.numeric(wtd_mean),
-                           "Weighted SD"   = as.numeric(wtd_sd),
-                           "2.5%"          = as.numeric(q_2.5),
-                           "97.5%"         = as.numeric(q_97.5),
-                           "ESS_comb/s"    = as.numeric(ess_comp_ber_sec[keep]))
-    rownames(summary_table) <- if(prob) c("beta", "gamma", "rho", "R_0", "reporting_prob") else c("beta", "gamma", "rho", "R_0")
+    summary_table <- cbind(
+      "Weighted mean" = as.numeric(wtd_mean),
+      "Weighted SD"   = as.numeric(wtd_sd),
+      "2.5%"          = as.numeric(q_2.5),
+      "97.5%"         = as.numeric(q_97.5),
+      "ESS_comb/s"    = as.numeric(ess_comp_ber_sec[keep])
+    )
+    rownames(summary_table) <- if (prob)
+      c("beta", "gamma", "rho", "R_0", "reporting_prob")
+    else
+      c("beta", "gamma", "rho", "R_0")
     print(round(summary_table, 3))
 
     list(
@@ -231,14 +281,20 @@ LMGP <- function(data_obs, Tmax, N, prob = FALSE, dt = 0.1, n_mc = 2000, r_a = 1
       weighted_sd      = wtd_sd,
       q2.5             = q_2.5,
       q97.5            = q_97.5,
-      ess_stan         = setNames(ess_stan$ess_bulk[keep],      param_names),  # Stan-only bulk-ESS
-      ess_combined     = setNames(ess_combined[keep],           param_names),  # MCMC x importance-weight ESS
-      ess_stan_per_sec = setNames(ess_stan$ess_per_sec[keep],   param_names),  # Stan-only throughput
-      ess_comp_ber_sec = setNames(ess_comp_ber_sec[keep],       param_names)   # full-pipeline throughput
+      ess_stan         = setNames(ess_stan$ess_bulk[keep], param_names),
+      # Stan-only bulk-ESS
+      ess_combined     = setNames(ess_combined[keep], param_names),
+      # MCMC x importance-weight ESS
+      ess_stan_per_sec = setNames(ess_stan$ess_per_sec[keep], param_names),
+      # Stan-only throughput
+      ess_comp_ber_sec = setNames(ess_comp_ber_sec[keep], param_names)   # full-pipeline throughput
     )
-  }else{
+  } else{
     list(
-      fit_full = fit_full, Z_hat = Z_hat, total_time = unname(total_time), Tmax = Tmax
+      fit_full = fit_full,
+      Z_hat = Z_hat,
+      total_time = unname(total_time),
+      Tmax = Tmax
     )
   }
 }

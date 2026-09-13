@@ -14,12 +14,21 @@
 #' @export
 
 
-summary_stan_adj <- function(draws_list, wts, ess_per_sec_par, index, true_value, not_cap = FALSE)
+summary_stan_adj <- function(draws_list,
+                             wts,
+                             ess_per_sec_par,
+                             index,
+                             true_value,
+                             not_cap = FALSE)
 {
-  temp1 <- mapply(function(d, w) Hmisc::wtd.quantile(d[[index]], w, probs = 0.025, normwt = TRUE),
-                  draws_list, wts)
-  temp2 <- mapply(function(d, w) Hmisc::wtd.quantile(d[[index]], w, probs = 0.975, normwt = TRUE),
-                  draws_list, wts)
+  temp1 <- mapply(function(d, w)
+    Hmisc::wtd.quantile(d[[index]], w, probs = 0.025, normwt = TRUE),
+    draws_list,
+    wts)
+  temp2 <- mapply(function(d, w)
+    Hmisc::wtd.quantile(d[[index]], w, probs = 0.975, normwt = TRUE),
+    draws_list,
+    wts)
   temp3 <- as.numeric(temp1 < true_value & true_value < temp2)
 
   if (not_cap == TRUE) {
@@ -27,10 +36,12 @@ summary_stan_adj <- function(draws_list, wts, ess_per_sec_par, index, true_value
     mat <- matrix(c(temp1[ret], temp2[ret]), ncol = 2)
     return(list(ret, mat))
   } else {
-    foo  <- mapply(function(d, w) sum(w * d[[index]]), draws_list, wts)
+    foo  <- mapply(function(d, w)
+      sum(w * d[[index]]), draws_list, wts)
     mn   <- mean(foo)
     sd_of_mn <- sd(foo)
-    sd   <- mean(mapply(function(d, w) wtd_sd(d[[index]], w), draws_list, wts))
+    sd   <- mean(mapply(function(d, w)
+      wtd_sd(d[[index]], w), draws_list, wts))
     covg <- mean(temp3)
     esspersec_val <- mean(ess_per_sec_par)
     return(c(mn, sd_of_mn, sd, covg, esspersec_val))
