@@ -1,3 +1,4 @@
+library(LMGPEpi)
 ebola_drc <- read.csv("ebola_drc_upto23Aug.csv")
 
 print(ebola_drc)

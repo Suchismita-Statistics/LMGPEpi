@@ -156,13 +156,6 @@ LMGP <- function(data_obs,
       p_b = p_b
     ))
 
-  # if (prob == TRUE) {
-  #   stan_file = system.file("stan", "LMGP_with_prob.stan", package = "LMGPEpi")
-  # } else {
-  #   stan_file = system.file("stan", "LMGP_wo_prob.stan", package = "LMGPEpi")
-  # }
-  #
-  # sm = rstan::stan_model(file = stan_file)
 
   stan_name <- if (isTRUE(prob)) {
     "LMGP_with_prob.stan"
@@ -171,15 +164,6 @@ LMGP <- function(data_obs,
   }
 
   stan_file <- system.file("stan", stan_name, package = "LMGPEpi")
-
-  if (!nzchar(stan_file) || !file.exists(stan_file)) {
-    stop("Could not find Stan file: ",
-         stan_name,
-         "\nExpected path: ",
-         stan_file)
-  }
-
-  message("Using Stan file: ", normalizePath(stan_file))
 
   sm <- rstan::stan_model(file = stan_file)
 
