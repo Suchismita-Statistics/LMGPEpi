@@ -41,7 +41,7 @@ wnorm_true_cts = wnorm_calc(LMGP_true_cts$Z_hat, M = length(LMGP_true_cts$Z_hat)
 out <- LMGP_ppc(
   prob = FALSE,
   fit_full = LMGP_true_cts$stan_fit,
-  data_obs = trial_data,     # cols: time, 3-day MA count
+  data_obs = trial_data,
   N = N_obs,
   raw_data = LMGP_true_cts$Incidence,    # optional: pre-MA counts, same length/order
   w_norm = wnorm_true_cts$w_norm
